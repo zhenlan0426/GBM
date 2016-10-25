@@ -288,3 +288,22 @@ def GBM_RandomSearch(X,y,Ntry,M,FixPara,RandomPara,weight):
 paras1 = {'BaseEst':ExtraTreeRegressor,'M_est':100, 'learnRate':0.0001}
 paras2 = {'BasePara':{'max_depth':16,'splitter':'random','max_features':0.9},'subFold':2}
 
+
+def Tree_Gen(orgList,curList,outList):
+    #pdb.set_trace()
+    #print outList
+    if len(orgList)==len(curList):
+        outList.append(curList)
+        #outList.append(Node(*curList))
+    else:
+        newList=[]
+        curList.append(0)
+        curListCopy = copy(curList)
+        Tree_Gen(orgList,curListCopy,newList)
+        outList.append(newList)
+        for i in range(1,orgList[len(curList)-1]):
+            newList=[]
+            curList[-1]=i
+            curListCopy = copy(curList)
+            Tree_Gen(orgList,curListCopy,newList)
+            outList.append(newList)
