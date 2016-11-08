@@ -7,88 +7,6 @@ from sklearn.metrics import accuracy_score, log_loss
 from sklearn.tree import DecisionTreeRegressor,DecisionTreeClassifier,ExtraTreeClassifier,ExtraTreeRegressor
 import pandas as pd
 
-# from sklearn.ensemble import GradientBoostingClassifier
-
-#class adaBoost_KClass(BaseEstimator, ClassifierMixin):
-#    
-#    def __init__(self,BaseEst,M_est,learnRate,BasePara,subFold):
-#        self.BaseEst=BaseEst
-#        self.M_est=M_est
-#        self.learnRate=learnRate
-#        self.estimator_=[]
-#        self.BasePara=BasePara
-#        self.subFold=subFold
-#        
-#    def fit(self,X,y,restart=True,M_add=None,weight=None):
-#        # y is a vector of size N
-#        # BaseEstimator has to support predict_proba and fit with weight
-#        N = len(y)
-#        K = len(np.unique(y))
-#        self.K=K
-#        Y = np.ones((N,K))/(1-K)
-#        Y[np.arange(N),y]=1
-#        kf = KFold(self.subFold).split(range(N))
-#        const=(1-K)/K*self.learnRate
-#        
-#        if weight==None:
-#            w = np.ones(N)/N
-#        else:
-#            w = weight/np.sum(weight)
-#            
-#        if M_add==None:
-#            M_add=self.M_est
-#            
-#        if restart==True:
-#            self.estimator_=[]
-#        else:
-#            for m in range(self.M_est):
-#                w*=np.exp(const*np.sum(Y*self.estimator_[m].predict_proba(X),1))
-#                
-#        for m in range(M_add):
-#
-#            index=np.random.permutation(N) # shuffle index for subsampling
-#            X,y,w,Y = X[index],y[index],w[index],Y[index]
-#            for train,_ in kf:
-#                self.estimator_.append(self.BaseEst(**self.BasePara).\
-#                fit(X[train],y[train],sample_weight=w[train]))
-#                w*=np.exp(const*np.sum(Y*self.estimator_[-1].predict_proba(X),1))
-#                #w=w/np.sum(w)
-#        
-#        self.M_est=len(self.estimator_)
-#        return self
-#        
-#    def predict(self,X):
-#        # predict needs to be a method of base learner
-#        yhat=np.zeros((X.shape[0],self.K))
-#        for m in range(self.M_est):
-#            yhat+=self.estimator_[m].predict_proba(X)
-#            #yhat+=self.estimator_[m].predict_log_proba(X)
-#        return np.argmax(yhat,1)
-#        
-#    def predict_proba(self,X):
-#        # exp loss is not optimized to calculate prob
-#        # predict_proba needs to be a method of base learner
-#        yhat=np.zeros((X.shape[0],self.K))
-#        for m in range(self.M_est):
-#            yhat+=self.estimator_[m].predict_proba(X)
-#        temp=np.exp(yhat*self.learnRate)
-#        return temp/np.sum(temp,1,keepdims=True)
-#        
-#    def plot(self,X,y,weight=None):
-#        N = len(y)
-#        K = self.K
-#        accr=np.zeros(self.M_est)
-#        yhat=np.zeros((N,K))
-#        for m in range(self.M_est):
-#            yhat+=self.estimator_[m].predict(X)
-#            if weight == None:
-#                accr[m]=1.0*np.sum(y==np.argmax(yhat,1))/N
-#            else:
-#                accr[m]=1.0*np.sum(weight*(y==np.argmax(yhat,1)))
-#        plt.plot(accr)
-        
-        
-        
 
 
 class GBM_KClass(BaseEstimator, ClassifierMixin):
@@ -285,25 +203,7 @@ def GBM_RandomSearch(X,y,Ntry,M,FixPara,RandomPara,weight):
 #model1=GBM_KClass(ExtraTreeRegressor,100,0.005,{'max_depth':16,'splitter':'random','max_features':0.9},2)
 #model1.fit(X_train,y_train)
 
-paras1 = {'BaseEst':ExtraTreeRegressor,'M_est':100, 'learnRate':0.0001}
-paras2 = {'BasePara':{'max_depth':16,'splitter':'random','max_features':0.9},'subFold':2}
+#paras1 = {'BaseEst':ExtraTreeRegressor,'M_est':100, 'learnRate':0.0001}
+#paras2 = {'BasePara':{'max_depth':16,'splitter':'random','max_features':0.9},'subFold':2}
 
 
-def Tree_Gen(orgList,curList,outList):
-    #pdb.set_trace()
-    #print outList
-    if len(orgList)==len(curList):
-        outList.append(curList)
-        #outList.append(Node(*curList))
-    else:
-        newList=[]
-        curList.append(0)
-        curListCopy = copy(curList)
-        Tree_Gen(orgList,curListCopy,newList)
-        outList.append(newList)
-        for i in range(1,orgList[len(curList)-1]):
-            newList=[]
-            curList[-1]=i
-            curListCopy = copy(curList)
-            Tree_Gen(orgList,curListCopy,newList)
-            outList.append(newList)
