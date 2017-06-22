@@ -1,11 +1,13 @@
 
 from sklearn.base import BaseEstimator, ClassifierMixin
 import numpy as np
-from sklearn.cross_validation import KFold
+# from sklearn.cross_validation import KFold
+from sklearn.model_selection import KFold
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score, log_loss
 from sklearn.tree import DecisionTreeRegressor,DecisionTreeClassifier,ExtraTreeClassifier,ExtraTreeRegressor
 import pandas as pd
+
 
 
 
@@ -32,7 +34,7 @@ class GBM_KClass(BaseEstimator, ClassifierMixin):
         self.K=K
         Y = np.zeros((N,K))
         Y[np.arange(N),y]=1
-        kf = KFold(N, n_folds=self.subFold)
+        kf = KFold(self.subFold,True)
         
         
         if baseline==None:
@@ -57,11 +59,7 @@ class GBM_KClass(BaseEstimator, ClassifierMixin):
         if weight==None:
             # without weight
             for m in range(M_add):
-                index=np.random.permutation(N) # shuffle index for subsampling
-                X,Y,yp,y_raw,y = X[index],Y[index],yp[index],y_raw[index],y[index]
-
-                #for test,train in kf:
-                for train,test in kf:    
+                for train,test in kf.split(X):    
                     
                     # subClass
                     # target=Y[test,:]-yp[test,:]
@@ -77,10 +75,7 @@ class GBM_KClass(BaseEstimator, ClassifierMixin):
             # with weight
             weight=weight.reshape((N,1))
             for m in range(M_add):
-                #pdb.set_trace()
-                index=np.random.permutation(N) # shuffle index for subsampling
-                X,Y,yp,y_raw,weight,y = X[index],Y[index],yp[index],y_raw[index],weight[index],y[index]
-                for train,test in kf:
+                for train,test in kf.split(X):
                     self.estimator_.append(self.BaseEst(**self.BasePara).\
                     fit(X[test,:],(Y[test,:]-yp[test,:])*weight[test]))
                     y_raw[train]+=self.learnRate*self.estimator_[-1].predict(X[train])
@@ -90,7 +85,7 @@ class GBM_KClass(BaseEstimator, ClassifierMixin):
         
         self.M_est=len(self.estimator_)
         plt.plot(best_score)
-        return np.min(best_score), y_raw
+        return self
         
         
     def predict_raw(self,X,baseline=None):
